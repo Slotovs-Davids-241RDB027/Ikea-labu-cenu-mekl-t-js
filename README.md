@@ -26,11 +26,17 @@ Cenas.
 Saites uz konkrētiem produktiem IKEA mājaslapā.
 
 ## Koda Apraksts
-iegut_preces_lidz_cenai(max_cena) – Funkcija, kas iegūst datus no IKEA tīmekļa lapas, parsē HTML un atgriež tos produktus, kuru cena ir mazāka vai vienāda ar lietotāja ievadīto cenu.
+Šis ir programmas kods, kas veic tīmekļa datu ieguvi no IKEA lapas un atgriež rezultātus, kas atbilst lietotāja norādītajai cenai. Kodā tiek izmantotas divas galvenās bibliotēkas: requests un beautifulsoup4, lai veiktu HTTP pieprasījumus un analizētu iegūtos HTML datus.
 
-Saites apstrāde – Programma izvelk katram produktam saiti uz attiecīgo produktu.
+Galvenās funkcijas un to apraksts:
+1) **iegut_preces_lidz_cenai(max_cena)**
+Šī funkcija atbild par galveno darbību – datu iegūšanu no IKEA lapas un rezultātu filtrēšanu pēc lietotāja ievadītās maksimālās cenas.
 
-Cena un apraksts – Tiek iegūti arī cenu un apraksta dati par katru produktu, un tie tiek atspoguļoti lietotājam.
+2) **extract_price(cena_info)**
+Šī funkcija ir atbildīga par cenas izvilkšanu no HTML elementa, kas satur cenu. IKEA lapā cenas var būt dažādās struktūrās, tādēļ šī funkcija mēģina atrast vispiemērotāko cenu, pārbaudot vairākus HTML atribūtus.
+
+3) **saite uz produktu**
+Katram produktam tiek atrasta saite, kas novirza uz konkrēto produktu IKEA mājaslapā. Programma izmanto prece.find("a", class_="productLink")["href"], lai iegūtu pilnu URL, kur lietotājs var iegādāties vai aplūkot papildus informāciju par produktu.
 
 ## Programmas Prasības
 Python 3.x vai jaunāka versija
