@@ -43,4 +43,4 @@ Python 3.x vai jaunāka versija
 
 Interneta pieslēgums, lai varētu veikt pieprasījumus uz IKEA mājaslapu
 
-Saite uz video ierakstu: https://drive.google.com/file/d/1-isFaXgm_Ck5UvdqJ-TEIdtsF4wyA9As/view?usp=sharing
+Saite uz video ierakstu: https://drive.google.com/file/d/12xXm-8w5yjGFY1jwIcQSzkCS4sAKpQI_/view?usp=sharing
