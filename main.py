@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-def iegut_preces_lidz_cenai(max_cena):
+def iegut_preces_filtrsetas(max_cena, min_cena=None, atslegvardu_saraksts=None):
     url = "https://www.ikea.lv/lv/last-chance"
     atbilde = requests.get(url)
 
@@ -10,38 +10,47 @@ def iegut_preces_lidz_cenai(max_cena):
         return
 
     soup = BeautifulSoup(atbilde.content, "html.parser")
-    bloka = soup.find_all(class_="itemBlock")
+    bloki = soup.find_all(class_="itemBlock")
 
-    atrastas_preces = []
+    atrastie = []
 
-    for prece in bloka:
-        nosaukums_elem = prece.find("h3")
-        apraksts_elem = prece.find("h4", class_="itemFacts")
-        cenas_elem = prece.find("span", {"data-price": True})
-        saite_elem = prece.find("a", href=True)
+    for bloks in bloki:
+        nosaukums_elem = bloks.find("h3")
+        apraksts_elem = bloks.find("h4", class_="itemFacts")
+        cena_elem = bloks.find("span", {"data-price": True})
+        saite_elem = bloks.find("a", href=True)
 
-        if nosaukums_elem and cenas_elem and saite_elem:
+        if nosaukums_elem and cena_elem and saite_elem:
             try:
-                cena = float(cenas_elem["data-price"])
-                if cena <= max_cena:
-                    saite = saite_elem["href"]
-                    if not saite.startswith("http"):
-                        saite = "https://www.ikea.lv" + saite
+                cena = float(cena_elem["data-price"])
+                if (min_cena is not None and cena < min_cena) or cena > max_cena:
+                    continue
 
-                    atrastas_preces.append({
-                        "nosaukums": nosaukums_elem.get_text(strip=True),
-                        "apraksts": apraksts_elem.get_text(strip=True) if apraksts_elem else "",
-                        "cena": cena,
-                        "saite": saite
-                    })
+                apraksts = apraksts_elem.get_text(strip=True).lower() if apraksts_elem else ""
+
+                if atslegvardu_saraksts:
+                    if not any(vards in apraksts for vards in atslegvardu_saraksts):
+                        continue
+
+                saite = saite_elem["href"]
+                if not saite.startswith("http"):
+                    saite = "https://www.ikea.lv" + saite
+
+                atrastie.append({
+                    "nosaukums": nosaukums_elem.get_text(strip=True),
+                    "apraksts": apraksts_elem.get_text(strip=True) if apraksts_elem else "",
+                    "cena": cena,
+                    "saite": saite
+                })
+
             except ValueError:
                 continue
 
-    if not atrastas_preces:
-        print("Nav atrasts neviens produkts šajā cenu diapazonā")
+    if not atrastie:
+        print("Nav atrasts neviens produkts pēc dotajiem kritērijiem")
     else:
-        print(f"\nAtrasti produkti zem {max_cena:.2f} EUR:\n")
-        for i, prece in enumerate(atrastas_preces, 1):
+        print(f"\nAtrasti produkti starp {min_cena or 0:.2f}€ un {max_cena:.2f}€:\n")
+        for i, prece in enumerate(atrastie, 1):
             print(f"{i}. {prece['nosaukums']}")
             print(f"   Apraksts: {prece['apraksts']}")
             print(f"   Cena: €{prece['cena']:.2f}")
@@ -49,9 +58,17 @@ def iegut_preces_lidz_cenai(max_cena):
 
 
 if __name__ == "__main__":
+    print("\n-= IKEA labu cenu meklētājs =-")
     try:
-        print("\n-=Labu cenu meklētājs=-")
-        lietotaja_cena = float(input("Ievadi maksimālo cenu (€): "))
-        iegut_preces_lidz_cenai(lietotaja_cena)
+        max_input = input("Ievadi MAKSIMĀLO cenu (€): ").strip()
+        min_input = input("Ievadi MINIMĀLO cenu (€): ").strip()
+        vardi_input = input("Ievadi meklējamos vārdus aprakstā: ").strip()
+
+        max_cena = float(max_input)
+        min_cena = float(min_input) if min_input else None
+        atslegvardu_saraksts = vardi_input.lower().split() if vardi_input else None
+
+        iegut_preces_filtrsetas(max_cena, min_cena, atslegvardu_saraksts)
+
     except ValueError:
-        print("Lūdzu ievadi pareizu skaitli!")
+        print("Lūdzu ievadi derīgas cenas kā skaitļus!")
